@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flappy Bird</title>
+    <link rel="icon" type="image/x-icon" href="Bird.png" />
+  </head>
+  <body>
+    <canvas
+      id="canvasku"
+      width="1075"
+      height="550"
+      style="border: 2px solid black; margin-left: 5%"
+    ></canvas>
+
+    <script>
+      let canvas = document.getElementById("canvasku");
+      let ctx = canvas.getContext("2d");
+
+      // Image Birdnya
+      let Bird = new Image();
+      Bird.src = "Bird.png";
+
+      // Suara saat lompat
+      let sound = new Audio();
+      sound.src = "tuing.mp3";
+
+      // Komposisi gambar Bird
+      let g = 0;
+      let xBird = 0;
+      let yBird = canvas.height / 2 + 25;
+      let wBird = 50;
+      let hBird = 50;
+
+      let xPipa = canvas.width;
+      let pipaHeight = Math.random() * canvas.height; // Tinggi pipa acak
+      let kecepatanPipa = 3;
+
+      let pipaPassed = false; // Menandakan apakah karakter Bird sudah melewati pipa
+      let score = 0; // Skor per lewati pipa
+
+      window.addEventListener("keypress", function () {
+        if (event.keyCode == 32) {
+          g = g - 10;
+          sound.pause();
+          sound.currentTime = 0;
+          sound.play();
+        }
+      });
+
+      function generatePipa() {
+        pipaHeight = Math.random() * (canvas.height - 250);
+        xPipa = canvas.width;
+        pipaPassed = false; // Reset status melewati pipa
+      }
+
+      generatePipa();
+
+      function drawScore() {
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "black";
+        ctx.fillText("Score: " + score, 10, 30);
+      }
+
+      window.setInterval(function () {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        g = g + 1;
+        ctx.drawImage(Bird, xBird, yBird, wBird, hBird);
+        yBird = yBird + g;
+
+        if (yBird >= canvas.height - hBird) {
+          g = 0;
+          xBird = 0;
+          yBird = canvas.height / 2 + 25;
+          wBird = 50;
+          hBird = 50;
+          alert("Game Over! Skor Anda: " + score);
+          generatePipa();
+          score = 0;
+        }
+        if (yBird < 0) {
+          yBird = 0;
+          g = 0;
+        }
+
+        // Gambar dan cek tabrakan dengan pipa
+        ctx.fillStyle = "green";
+        ctx.fillRect(xPipa, 0, 50, pipaHeight);
+        ctx.strokeRect(xPipa, 0, 50, pipaHeight);
+        ctx.fillStyle = "green";
+        ctx.fillRect(xPipa, pipaHeight + 100, 50, canvas.height - pipaHeight);
+        ctx.strokeRect(xPipa, pipaHeight + 100, 50, canvas.height - pipaHeight);
+
+        if (
+          xBird + wBird >= xPipa &&
+          xBird <= xPipa + 50 &&
+          (yBird <= pipaHeight || yBird + hBird >= pipaHeight + 100)
+        ) {
+          alert("Game Over! Skor Anda: " + score);
+          generatePipa();
+          score = 0; // Reset skor saat permainan berakhir
+        }
+
+        xPipa -= kecepatanPipa;
+
+        // Jika karakter Bird telah melewati pipa, tambahkan skor dan buat pipa baru
+        if (xBird > xPipa + 50 && !pipaPassed) {
+          pipaPassed = true;
+          score++;
+          generatePipa();
+        }
+
+        drawScore();
+      }, 1000 / 30);
+    </script>
+  </body>
+</html>
